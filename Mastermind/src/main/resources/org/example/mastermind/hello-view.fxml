@@ -1,16 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.mastermind.HelloController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-  </padding>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.mastermind.Controller"
+      spacing="12"
+      style="-fx-background-color: #1e1e2e; -fx-padding: 20;">
 
-  <Label fx:id="welcomeText"/>
-  <Button text="Hello!" onAction="#onHelloButtonClick"/>
+  <!-- Titel -->
+  <Label text="🎨 MASTERMIND"
+         style="-fx-text-fill: #cdd6f4; -fx-font-size: 22px; -fx-font-weight: bold; -fx-font-family: 'Monospace';"/>
+
+  <!-- Versuche verbleibend -->
+  <Label fx:id="attemptsLabel"
+         text="Versuche verbleibend: 10"
+         style="-fx-text-fill: #a6e3a1; -fx-font-size: 13px; -fx-font-family: 'Monospace';"/>
+
+  <!-- Spielbrett (bisherige Versuche) -->
+  <ScrollPane fx:id="scrollPane"
+              fitToWidth="true"
+              prefHeight="340"
+              style="-fx-background: #181825; -fx-background-color: #181825; -fx-border-color: #45475a; -fx-border-radius: 6;">
+    <VBox fx:id="boardBox" spacing="6">
+      <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+      </padding>
+    </VBox>
+  </ScrollPane>
+
+  <!-- Eingabebereich -->
+  <HBox spacing="10" alignment="CENTER_LEFT">
+    <TextField fx:id="guessField"
+               promptText="z. B. R G B Y"
+               prefWidth="200"
+               style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4;
+                          -fx-prompt-text-fill: #6c7086; -fx-font-family: 'Monospace';
+                          -fx-font-size: 14px; -fx-border-color: #89b4fa;
+                          -fx-border-radius: 4; -fx-background-radius: 4;"/>
+    <Button fx:id="submitButton"
+            text="Raten ▶"
+            onAction="#onGuessSubmit"
+            style="-fx-background-color: #89b4fa; -fx-text-fill: #1e1e2e;
+                       -fx-font-weight: bold; -fx-font-family: 'Monospace';
+                       -fx-font-size: 13px; -fx-background-radius: 4;
+                       -fx-cursor: hand;"/>
+  </HBox>
+
+  <!-- Erlaubte Farben -->
+  <Label text="Farben: R=Rot  G=Grün  B=Blau  Y=Gelb  O=Orange  P=Pink"
+         style="-fx-text-fill: #6c7086; -fx-font-size: 11px; -fx-font-family: 'Monospace';"/>
+
+  <!-- Fehlermeldung -->
+  <Label fx:id="errorLabel"
+         text=""
+         style="-fx-text-fill: #f38ba8; -fx-font-size: 12px; -fx-font-family: 'Monospace';"/>
+
+  <!-- Ergebnis-Meldung -->
+  <Label fx:id="resultLabel"
+         text=""
+         style="-fx-text-fill: #f9e2af; -fx-font-size: 15px; -fx-font-weight: bold;
+                  -fx-font-family: 'Monospace';"/>
+
+  <!-- Neu starten -->
+  <Button fx:id="restartButton"
+          text="🔄 Neues Spiel"
+          onAction="#onRestart"
+          visible="false"
+          style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e;
+                   -fx-font-weight: bold; -fx-font-family: 'Monospace';
+                   -fx-font-size: 13px; -fx-background-radius: 4;
+                   -fx-cursor: hand;"/>
+
 </VBox>
