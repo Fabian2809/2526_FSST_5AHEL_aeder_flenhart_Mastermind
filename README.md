@@ -13,6 +13,7 @@
 - Fenstergröße änderbar  
 - Alle Versuche immer sehen (nicht scrollbar)
 - Hinttaste (nur Farben die enthalten sind)
+- Tastatureingabe
 
 ## 26.3.
 
