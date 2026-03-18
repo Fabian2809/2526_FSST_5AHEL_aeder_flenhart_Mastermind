@@ -13,7 +13,7 @@ public class Application extends javafx.application.Application {
         FXMLLoader fxmlLoader = new FXMLLoader(
             Application.class.getResource("hello-view.fxml")
         );
-        Scene scene = new Scene(fxmlLoader.load(), 480, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 460, 680);
         stage.setTitle("Mastermind");
         stage.setResizable(false);
         stage.setScene(scene);
