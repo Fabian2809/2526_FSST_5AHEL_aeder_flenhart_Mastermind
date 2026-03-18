@@ -1,1 +1,3 @@
-# 2526_FSST_5AHEL_aeder_flenhart_Mastermind
+# Mastermind
+
+### Projekt erstellen & mit Github verknüpfen
