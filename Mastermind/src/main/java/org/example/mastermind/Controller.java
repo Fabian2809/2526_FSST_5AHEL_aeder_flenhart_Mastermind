@@ -48,16 +48,19 @@ public class Controller {
     // ─────────────────────────────────────────────────────
     //  Spielzustand
     // ─────────────────────────────────────────────────────
-    private Model model;
-    private char[]  currentGuess = new char[4];
-    private int     filledSlots  = 0;
-    private Label[] slotLabels   = new Label[4];
-
-    /** Referenzen auf Palette-Labels, damit wir sie ausgrauen können */
+    private Model   model;
+    private char[]  currentGuess  = new char[4];
+    private int     filledSlots   = 0;
+    private Label[] slotLabels    = new Label[4];
     private Label[] paletteLabels = new Label[6];
+    private HBox[]  boardRows     = new HBox[10];
 
-    /** Vorschau-Zeilen im Board (10 Stück, vorbefüllt) */
-    private HBox[] boardRows = new HBox[10];
+    /**
+     * Merkt sich welche Palette-Einträge durch den Hint deaktiviert wurden.
+     * Wird beim Neustart zurückgesetzt, aber NICHT nach jedem Versuch.
+     */
+    private boolean[] hintDisabled = new boolean[6];
+    private boolean   hintUsed     = false;
 
     // ─────────────────────────────────────────────────────
     //  Initialisierung
@@ -72,44 +75,40 @@ public class Controller {
         setupKeyboardInput();
     }
 
-    /**
-     * Baut das feste 10-Zeilen-Board auf (alle Zeilen leer, wachsen mit Fenster).
-     * VBox.vgrow=ALWAYS damit sie den Center-Bereich füllen.
-     */
+    // ─────────────────────────────────────────────────────
+    //  Board aufbauen (10 feste Zeilen)
+    // ─────────────────────────────────────────────────────
+
     private void buildBoard() {
         boardBox.getChildren().clear();
-        boardBox.setFillWidth(true);
-        VBox.setVgrow(boardBox, Priority.ALWAYS);
-
         for (int row = 0; row < 10; row++) {
             HBox rowBox = buildEmptyRow(row);
             boardRows[row] = rowBox;
-            VBox.setVgrow(rowBox, Priority.ALWAYS);
             boardBox.getChildren().add(rowBox);
         }
     }
 
-    /** Erstellt eine leere Board-Zeile mit Zeilennummer, 4 leeren Chips und leerem Hint-Grid. */
     private HBox buildEmptyRow(int rowIndex) {
-        HBox row = new HBox(12);
+        HBox row = new HBox(10);
         row.setAlignment(Pos.CENTER);
-        row.setPadding(new Insets(4, 8, 4, 8));
+        row.setPrefHeight(34);
         row.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(row, Priority.ALWAYS);
+        row.setPadding(new Insets(3, 6, 3, 6));
+        row.setStyle("-fx-background-color: transparent;");
 
-        // Zeilennummer (1 = unterste, sichtbar wenn noch offen)
+        // Zeilennummer
         Label num = new Label(String.valueOf(10 - rowIndex));
-        num.setPrefWidth(20);
+        num.setPrefWidth(18);
         num.setAlignment(Pos.CENTER_RIGHT);
-        num.setStyle("-fx-text-fill: #252535; -fx-font-size: 11px; -fx-font-family: 'Courier New';");
+        num.setStyle("-fx-text-fill: #1e1e2a; -fx-font-size: 10px; -fx-font-family: 'Courier New';");
 
-        // 4 leere Chips
-        HBox chips = new HBox(7);
+        // 4 leere Farbchips
+        HBox chips = new HBox(6);
         chips.setAlignment(Pos.CENTER);
         for (int i = 0; i < 4; i++) {
             Label chip = new Label();
-            chip.setPrefSize(30, 30);
-            chip.setMinSize(30, 30);
+            chip.setPrefSize(28, 28);
+            chip.setMinSize(28, 28);
             chip.setStyle(emptyChipStyle());
             chips.getChildren().add(chip);
         }
@@ -125,73 +124,68 @@ public class Controller {
         return row;
     }
 
-    /** Leeres 2×2 Hint-Grid mit dim Punkten. */
     private GridPane buildEmptyHintGrid() {
         GridPane grid = new GridPane();
-        grid.setHgap(4);
-        grid.setVgap(4);
+        grid.setHgap(3);
+        grid.setVgap(3);
         grid.setAlignment(Pos.CENTER);
-        grid.setPrefWidth(38);
+        grid.setPrefWidth(34);
         for (int i = 0; i < 4; i++) {
             Label dot = new Label("·");
-            dot.setPrefSize(14, 14);
+            dot.setPrefSize(13, 13);
             dot.setAlignment(Pos.CENTER);
-            dot.setStyle("-fx-text-fill: #1e1e2e; -fx-font-size: 12px;");
+            dot.setStyle("-fx-text-fill: #1a1a26; -fx-font-size: 11px;");
             grid.add(dot, i % 2, i / 2);
         }
         return grid;
     }
 
-    /** Befüllt Zeile rowIndex mit einem gespielten Versuch. */
     private void fillBoardRow(int rowIndex, char[] guess, int exact, int color) {
-        HBox row = boardRows[rowIndex];
-
-        // Chips befüllen (Index 1 = HBox mit Chips)
+        HBox row   = boardRows[rowIndex];
         HBox chips = (HBox) row.getChildren().get(1);
+
         for (int i = 0; i < 4; i++) {
             Label chip = (Label) chips.getChildren().get(i);
             chip.setStyle(
                 "-fx-background-color: " + hexForChar(guess[i]) + ";" +
-                "-fx-background-radius: 15;"
+                "-fx-background-radius: 14;"
             );
         }
 
-        // Hint-Grid ersetzen (Index 3)
         GridPane hints = new GridPane();
-        hints.setHgap(4);
-        hints.setVgap(4);
+        hints.setHgap(3);
+        hints.setVgap(3);
         hints.setAlignment(Pos.CENTER);
-        hints.setPrefWidth(38);
+        hints.setPrefWidth(34);
 
         int shown = 0;
-        for (int i = 0; i < exact; i++) { addDot(hints, "●", "#e8e8f0", shown++); }
-        for (int i = 0; i < color; i++) { addDot(hints, "○", "#555566", shown++); }
-        while (shown < 4)               { addDot(hints, "·", "#1e1e2e", shown++); }
+        for (int i = 0; i < exact; i++) addDot(hints, "●", "#dedef0", shown++);
+        for (int i = 0; i < color; i++) addDot(hints, "○", "#444456", shown++);
+        while (shown < 4)               addDot(hints, "·", "#1a1a26", shown++);
 
         row.getChildren().set(3, hints);
 
-        // Zeilennummer heller machen
-        Label num = (Label) row.getChildren().get(0);
-        num.setStyle("-fx-text-fill: #35354a; -fx-font-size: 11px; -fx-font-family: 'Courier New';");
-
-        // Aktive Zeile hervorheben
+        // Hintergrund der gespielten Zeile leicht aufhellen
         row.setStyle(
-            "-fx-background-color: #14141e;" +
-            "-fx-background-radius: 8;" +
-            "-fx-padding: 4 8 4 8;"
+            "-fx-background-color: #12121c;" +
+            "-fx-background-radius: 7;" +
+            "-fx-padding: 3 6 3 6;"
         );
+
+        Label num = (Label) row.getChildren().get(0);
+        num.setStyle("-fx-text-fill: #2e2e40; -fx-font-size: 10px; -fx-font-family: 'Courier New';");
     }
 
     private void addDot(GridPane grid, String sym, String col, int idx) {
         Label d = new Label(sym);
-        d.setPrefSize(14, 14);
+        d.setPrefSize(13, 13);
         d.setAlignment(Pos.CENTER);
-        d.setStyle("-fx-text-fill: " + col + "; -fx-font-size: 12px;");
+        d.setStyle("-fx-text-fill: " + col + "; -fx-font-size: 11px;");
         grid.add(d, idx % 2, idx / 2);
     }
 
     // ─────────────────────────────────────────────────────
-    //  Slots (aktueller Versuch)
+    //  Eingabe-Slots
     // ─────────────────────────────────────────────────────
 
     private void buildSlots() {
@@ -202,8 +196,8 @@ public class Controller {
         for (int i = 0; i < 4; i++) {
             final int idx = i;
             Label slot = new Label();
-            slot.setPrefSize(46, 46);
-            slot.setMinSize(46, 46);
+            slot.setPrefSize(44, 44);
+            slot.setMinSize(44, 44);
             slot.setAlignment(Pos.CENTER);
             slot.setStyle(emptySlotStyle());
             slot.setOnMouseClicked(e -> removeFromSlot(idx));
@@ -215,6 +209,8 @@ public class Controller {
     private void addColorByChar(char c) {
         for (int i = 0; i < COLOR_CHARS.length; i++) {
             if (COLOR_CHARS[i] == c) {
+                // Tastatureingabe: ausgegaute Farben (Hint) trotzdem blockieren
+                if (hintDisabled[i]) return;
                 addColor(c, COLOR_HEX[i]);
                 return;
             }
@@ -225,8 +221,7 @@ public class Controller {
         if (filledSlots >= 4) return;
         errorLabel.setText("");
         currentGuess[filledSlots] = c;
-        Label slot = slotLabels[filledSlots];
-        slot.setStyle(filledSlotStyle(hex));
+        slotLabels[filledSlots].setStyle(filledSlotStyle(hex));
         filledSlots++;
     }
 
@@ -258,18 +253,19 @@ public class Controller {
             final char   c    = COLOR_CHARS[i];
             final String hex  = COLOR_HEX[i];
             final String name = COLOR_NAMES[i];
+            final int    idx  = i;
 
             Label btn = new Label(String.valueOf(c));
-            btn.setPrefSize(42, 42);
-            btn.setMinSize(42, 42);
+            btn.setPrefSize(40, 40);
+            btn.setMinSize(40, 40);
             btn.setAlignment(Pos.CENTER);
             btn.setStyle(colorBtnStyle(hex));
             btn.setTooltip(new Tooltip(name));
 
-            DropShadow glow = new DropShadow(12, Color.web(hex + "99"));
-            btn.setOnMouseEntered(e -> { if (btn.getOpacity() > 0.4) btn.setEffect(glow); });
+            DropShadow glow = new DropShadow(10, Color.web(hex + "88"));
+            btn.setOnMouseEntered(e -> { if (!hintDisabled[idx]) btn.setEffect(glow); });
             btn.setOnMouseExited(e  -> btn.setEffect(null));
-            btn.setOnMouseClicked(e -> { if (btn.getOpacity() > 0.4) addColor(c, hex); });
+            btn.setOnMouseClicked(e -> { if (!hintDisabled[idx]) addColor(c, hex); });
 
             paletteLabels[i] = btn;
             colorPalette.getChildren().add(btn);
@@ -280,12 +276,7 @@ public class Controller {
     //  Tastatur-Eingabe
     // ─────────────────────────────────────────────────────
 
-    /**
-     * Setzt einen KeyEvent-Filter auf die gesamte Szene.
-     * Wird aufgerufen sobald die Scene gesetzt ist (über sceneProperty-Listener).
-     */
     private void setupKeyboardInput() {
-        // boardBox ist immer in der Szene – wir hören auf die Scene, sobald sie verfügbar ist
         boardBox.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKey);
@@ -295,7 +286,6 @@ public class Controller {
 
     private void handleKey(KeyEvent e) {
         if (model.isOver()) return;
-
         KeyCode code = e.getCode();
 
         if (code == KeyCode.ENTER) {
@@ -308,10 +298,7 @@ public class Controller {
             if (text.length() == 1) {
                 char c = text.charAt(0);
                 for (char valid : COLOR_CHARS) {
-                    if (c == valid) {
-                        addColorByChar(c);
-                        break;
-                    }
+                    if (c == valid) { addColorByChar(c); break; }
                 }
             }
         }
@@ -329,16 +316,16 @@ public class Controller {
         }
         errorLabel.setText("");
 
-        // Welche Board-Zeile ist die nächste? (von unten: 9,8,7,...)
         int usedBefore = Model.MAX_ATTEMPTS - model.getRemainingAttempts();
-        int rowIndex   = usedBefore; // Zeile von oben (0=oberste)
-
-        int[] result = model.checkGuess(currentGuess.clone());
-        fillBoardRow(rowIndex, currentGuess.clone(), result[0], result[1]);
+        int[] result   = model.checkGuess(currentGuess.clone());
+        fillBoardRow(usedBefore, currentGuess.clone(), result[0], result[1]);
 
         updateAttemptsLabel();
         buildSlots();
-        resetHint();
+
+        // Hint-Status BLEIBT nach dem Versuch erhalten – ausgegaute Farben
+        // bleiben ausgegraut für den Rest des Spiels
+        if (hintUsed) reapplyHint();
 
         if (model.isWon()) {
             showResult("🎉  Gewonnen! Code geknackt!", true);
@@ -352,35 +339,72 @@ public class Controller {
     private void onClearSlots() {
         buildSlots();
         errorLabel.setText("");
+        // Hint-Zustand nach Löschen der Slots wieder anwenden
+        if (hintUsed) reapplyHint();
     }
 
-    /** Graut alle Farben aus, die NICHT im geheimen Code enthalten sind. */
+    /**
+     * Graut alle Farben dauerhaft aus, die NICHT im Code enthalten sind.
+     * Bleibt für den Rest des Spiels aktiv.
+     */
     @FXML
     private void onHint() {
+        if (hintUsed) return;
+        hintUsed = true;
+
         Set<Character> inCode = model.getColorsInCode();
         for (int i = 0; i < COLOR_CHARS.length; i++) {
             if (!inCode.contains(COLOR_CHARS[i])) {
-                paletteLabels[i].setOpacity(0.18);
+                hintDisabled[i] = true;
+            }
+        }
+
+        applyHintVisuals();
+
+        hintButton.setDisable(true);
+        hintButton.setStyle(
+            "-fx-background-color: #13131e; -fx-text-fill: #252535;" +
+            "-fx-font-family: 'Courier New'; -fx-font-size: 12px;" +
+            "-fx-background-radius: 6; -fx-border-color: #1a1a26;" +
+            "-fx-border-radius: 6; -fx-border-width: 1;"
+        );
+    }
+
+    /** Wendet die Hint-Ausgrauung visuell an (beim ersten Aufruf und nach buildSlots). */
+    private void applyHintVisuals() {
+        for (int i = 0; i < COLOR_CHARS.length; i++) {
+            if (hintDisabled[i]) {
+                paletteLabels[i].setOpacity(0.15);
                 paletteLabels[i].setStyle(
-                    colorBtnStyle(COLOR_HEX[i]) +
-                    "-fx-background-color: #1e1e2a; -fx-text-fill: #333340;"
+                    "-fx-background-color: #18181f;" +
+                    "-fx-background-radius: 20;" +
+                    "-fx-text-fill: #252530;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-font-family: 'Courier New';" +
+                    "-fx-font-size: 12px;"
                 );
             }
         }
-        hintButton.setDisable(true);
-        hintButton.setStyle(
-            "-fx-background-color: #1a1a2a; -fx-text-fill: #333340;" +
-            "-fx-font-family: 'Courier New'; -fx-font-size: 12px;" +
-            "-fx-background-radius: 6;"
-        );
+    }
+
+    /**
+     * Nach buildSlots() (neuer Versuch) muss der Hint-Zustand erneut
+     * auf die neu erstellten Palette-Labels angewendet werden,
+     * da buildColorPalette() NICHT nochmal aufgerufen wird.
+     */
+    private void reapplyHint() {
+        applyHintVisuals();
     }
 
     @FXML
     private void onRestart() {
-        model = new Model();
+        model        = new Model();
+        hintUsed     = false;
+        hintDisabled = new boolean[6];
+
         buildBoard();
         buildSlots();
-        resetHint();
+        buildColorPalette();   // Palette komplett neu aufbauen → alle Farben aktiv
         errorLabel.setText("");
         resultBox.setVisible(false);
         resultBox.setManaged(false);
@@ -388,10 +412,10 @@ public class Controller {
         clearButton.setDisable(false);
         hintButton.setDisable(false);
         hintButton.setStyle(
-            "-fx-background-color: #2a2a3a; -fx-text-fill: #f9e2af;" +
+            "-fx-background-color: #1e1e2e; -fx-text-fill: #f9e2af;" +
             "-fx-font-family: 'Courier New'; -fx-font-size: 12px;" +
             "-fx-background-radius: 6; -fx-cursor: hand;" +
-            "-fx-border-color: #3a3a4a; -fx-border-radius: 6;"
+            "-fx-border-color: #2e2e40; -fx-border-radius: 6; -fx-border-width: 1;"
         );
         updateAttemptsLabel();
     }
@@ -409,7 +433,7 @@ public class Controller {
         resultLabel.setText(message);
         resultLabel.setStyle(
             "-fx-text-fill: " + (won ? "#a6e3a1" : "#f38ba8") + ";" +
-            "-fx-font-size: 14px; -fx-font-weight: bold;" +
+            "-fx-font-size: 13px; -fx-font-weight: bold;" +
             "-fx-font-family: 'Courier New'; -fx-text-alignment: center;"
         );
         resultBox.setVisible(true);
@@ -417,14 +441,6 @@ public class Controller {
         submitButton.setDisable(true);
         clearButton.setDisable(true);
         hintButton.setDisable(true);
-    }
-
-    /** Setzt die Palette nach onRestart zurück. */
-    private void resetHint() {
-        for (int i = 0; i < COLOR_CHARS.length; i++) {
-            paletteLabels[i].setOpacity(1.0);
-            paletteLabels[i].setStyle(colorBtnStyle(COLOR_HEX[i]));
-        }
     }
 
     private String hexForChar(char c) {
@@ -439,34 +455,34 @@ public class Controller {
     // ─────────────────────────────────────────────────────
 
     private String emptyChipStyle() {
-        return "-fx-background-color: #18181f;" +
-               "-fx-background-radius: 15;" +
-               "-fx-border-color: #1e1e2a;" +
+        return "-fx-background-color: #16161e;" +
+               "-fx-background-radius: 14;" +
+               "-fx-border-color: #1c1c28;" +
                "-fx-border-width: 1;" +
-               "-fx-border-radius: 15;";
+               "-fx-border-radius: 14;";
     }
 
     private String emptySlotStyle() {
-        return "-fx-background-color: #18181f;" +
-               "-fx-background-radius: 23;" +
-               "-fx-border-color: #2e2e42;" +
+        return "-fx-background-color: #16161e;" +
+               "-fx-background-radius: 22;" +
+               "-fx-border-color: #2a2a3c;" +
                "-fx-border-width: 2;" +
-               "-fx-border-radius: 23;" +
+               "-fx-border-radius: 22;" +
                "-fx-cursor: default;";
     }
 
     private String filledSlotStyle(String hex) {
         return "-fx-background-color: " + hex + ";" +
-               "-fx-background-radius: 23;" +
+               "-fx-background-radius: 22;" +
                "-fx-border-color: transparent;" +
                "-fx-border-width: 2;" +
-               "-fx-border-radius: 23;" +
+               "-fx-border-radius: 22;" +
                "-fx-cursor: hand;";
     }
 
     private String colorBtnStyle(String hex) {
         return "-fx-background-color: " + hex + ";" +
-               "-fx-background-radius: 21;" +
+               "-fx-background-radius: 20;" +
                "-fx-cursor: hand;" +
                "-fx-font-weight: bold;" +
                "-fx-font-family: 'Courier New';" +

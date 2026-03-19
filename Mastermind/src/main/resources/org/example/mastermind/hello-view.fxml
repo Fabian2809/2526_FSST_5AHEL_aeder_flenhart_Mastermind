@@ -4,27 +4,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<!--
-  Haupt-Layout: BorderPane
-    TOP    → Header (Titel + Versuche)
-    CENTER → Spielbrett (10 feste Zeilen) + Eingabebereich
-    BOTTOM → Ergebnis-Banner (nur sichtbar wenn Spiel endet)
--->
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.mastermind.Controller"
-            style="-fx-background-color: #0d0d12;"
-            minWidth="460" minHeight="660">
+            prefWidth="460" prefHeight="720"
+            minWidth="460"  minHeight="720"
+            maxWidth="460"  maxHeight="720"
+            style="-fx-background-color: #0d0d12;">
 
     <!-- ═══ TOP: HEADER ═══ -->
     <top>
         <VBox alignment="CENTER" spacing="3"
-              style="-fx-background-color: #0d0d12; -fx-padding: 20 0 12 0;">
+              style="-fx-background-color: #0d0d12; -fx-padding: 18 0 10 0;">
             <Label text="MASTERMIND"
-                   style="-fx-text-fill: #e8e8f0; -fx-font-size: 24px;
+                   style="-fx-text-fill: #e8e8f0; -fx-font-size: 22px;
                           -fx-font-weight: bold; -fx-font-family: 'Courier New';"/>
             <Label fx:id="attemptsLabel" text="10 Versuche verbleibend"
-                   style="-fx-text-fill: #40404f; -fx-font-size: 11px;
+                   style="-fx-text-fill: #383848; -fx-font-size: 11px;
                           -fx-font-family: 'Courier New';"/>
         </VBox>
     </top>
@@ -33,67 +29,64 @@
     <center>
         <VBox spacing="0">
 
-            <!-- SPIELBRETT: 10 Zeilen, wächst mit dem Fenster -->
-            <VBox fx:id="boardBox" spacing="0" alignment="TOP_CENTER"
-                  style="-fx-background-color: #0d0d12; -fx-padding: 0 20 0 20;">
-                <VBox.vgrow>ALWAYS</VBox.vgrow>
-                <!-- Zeilen werden vom Controller eingefügt -->
-            </VBox>
+            <!-- SPIELBRETT: 10 feste Zeilen -->
+            <VBox fx:id="boardBox" spacing="2" alignment="TOP_CENTER"
+                  prefHeight="380"
+                  style="-fx-background-color: #0d0d12; -fx-padding: 4 24 4 24;"/>
 
             <!-- TRENNLINIE -->
-            <Separator style="-fx-background-color: #1e1e2a;"/>
+            <Separator style="-fx-background-color: #18182a; -fx-opacity: 1;"/>
 
             <!-- EINGABE-BEREICH -->
-            <VBox alignment="CENTER" spacing="10"
-                  style="-fx-background-color: #10101a; -fx-padding: 14 20 14 20;">
+            <VBox alignment="CENTER" spacing="9"
+                  style="-fx-background-color: #0f0f18; -fx-padding: 12 20 12 20;">
 
-                <!-- Slot-Label -->
                 <Label text="AKTUELLER VERSUCH"
-                       style="-fx-text-fill: #333344; -fx-font-size: 9px;
+                       style="-fx-text-fill: #282838; -fx-font-size: 9px;
                               -fx-font-family: 'Courier New';"/>
 
                 <!-- 4 Slots -->
                 <HBox fx:id="slotsBox" spacing="10" alignment="CENTER"/>
 
-                <!-- Farb-Palette -->
-                <HBox fx:id="colorPalette" spacing="10" alignment="CENTER"
-                      style="-fx-padding: 4 0 0 0;"/>
+                <!-- Farbpalette -->
+                <HBox fx:id="colorPalette" spacing="9" alignment="CENTER"
+                      style="-fx-padding: 2 0 0 0;"/>
 
-                <!-- Tastatur-Tipp + Fehler -->
-                <HBox alignment="CENTER" spacing="0">
-                    <Label fx:id="errorLabel" text=""
-                           style="-fx-text-fill: #e06c75; -fx-font-size: 11px;
-                                  -fx-font-family: 'Courier New';"/>
-                </HBox>
+                <!-- Fehlermeldung -->
+                <Label fx:id="errorLabel" text=""
+                       prefHeight="14"
+                       style="-fx-text-fill: #e06c75; -fx-font-size: 11px;
+                              -fx-font-family: 'Courier New';"/>
 
-                <!-- Buttons -->
-                <HBox alignment="CENTER" spacing="10">
+                <!-- Aktions-Buttons -->
+                <HBox alignment="CENTER" spacing="9">
                     <Button fx:id="submitButton" text="RATEN"
                             onAction="#onGuessSubmit"
-                            prefWidth="130" prefHeight="36"
+                            prefWidth="120" prefHeight="34"
                             style="-fx-background-color: #4a9eff; -fx-text-fill: #ffffff;
                                    -fx-font-weight: bold; -fx-font-family: 'Courier New';
                                    -fx-font-size: 12px; -fx-background-radius: 6;
                                    -fx-cursor: hand;"/>
                     <Button fx:id="hintButton" text="💡 HINT"
                             onAction="#onHint"
-                            prefWidth="100" prefHeight="36"
-                            style="-fx-background-color: #2a2a3a; -fx-text-fill: #f9e2af;
+                            prefWidth="95" prefHeight="34"
+                            style="-fx-background-color: #1e1e2e; -fx-text-fill: #f9e2af;
                                    -fx-font-family: 'Courier New'; -fx-font-size: 12px;
                                    -fx-background-radius: 6; -fx-cursor: hand;
-                                   -fx-border-color: #3a3a4a; -fx-border-radius: 6;"/>
+                                   -fx-border-color: #2e2e40; -fx-border-radius: 6;
+                                   -fx-border-width: 1;"/>
                     <Button fx:id="clearButton" text="✕"
                             onAction="#onClearSlots"
-                            prefWidth="44" prefHeight="36"
-                            style="-fx-background-color: #1e1e2e; -fx-text-fill: #555566;
-                                   -fx-font-family: 'Courier New'; -fx-font-size: 14px;
-                                   -fx-background-radius: 6; -fx-cursor: hand;
-                                   -fx-border-color: #2a2a3e; -fx-border-radius: 6;"/>
+                            prefWidth="40" prefHeight="34"
+                            style="-fx-background-color: #16161f; -fx-text-fill: #444455;
+                                   -fx-font-size: 14px; -fx-background-radius: 6;
+                                   -fx-cursor: hand; -fx-border-color: #222230;
+                                   -fx-border-radius: 6; -fx-border-width: 1;"/>
                 </HBox>
 
                 <!-- Tastatur-Hinweis -->
-                <Label text="Tastatur: R G B Y O P  |  Backspace = löschen  |  Enter = raten"
-                       style="-fx-text-fill: #2a2a3a; -fx-font-size: 9px;
+                <Label text="R G B Y O P  ·  Backspace = löschen  ·  Enter = raten"
+                       style="-fx-text-fill: #1e1e2c; -fx-font-size: 9px;
                               -fx-font-family: 'Courier New';"/>
             </VBox>
 
@@ -102,17 +95,18 @@
 
     <!-- ═══ BOTTOM: ERGEBNIS-BANNER ═══ -->
     <bottom>
-        <VBox fx:id="resultBox" alignment="CENTER" spacing="10"
-              style="-fx-background-color: #13131e; -fx-padding: 14 20 18 20;
-                     -fx-border-color: #1e1e2e; -fx-border-width: 1 0 0 0;"
+        <VBox fx:id="resultBox" alignment="CENTER" spacing="9"
+              style="-fx-background-color: #0c0c14;
+                     -fx-border-color: #1a1a26; -fx-border-width: 1 0 0 0;
+                     -fx-padding: 12 20 16 20;"
               visible="false" managed="false">
             <Label fx:id="resultLabel" text=""
-                   style="-fx-text-fill: #f9e2af; -fx-font-size: 14px;
+                   style="-fx-text-fill: #f9e2af; -fx-font-size: 13px;
                           -fx-font-weight: bold; -fx-font-family: 'Courier New';
                           -fx-text-alignment: center;" wrapText="true"/>
             <Button fx:id="restartButton" text="⟳  NEUES SPIEL"
                     onAction="#onRestart"
-                    prefWidth="160" prefHeight="36"
+                    prefWidth="150" prefHeight="34"
                     style="-fx-background-color: #a6e3a1; -fx-text-fill: #0d0d12;
                            -fx-font-weight: bold; -fx-font-family: 'Courier New';
                            -fx-font-size: 12px; -fx-background-radius: 6;
