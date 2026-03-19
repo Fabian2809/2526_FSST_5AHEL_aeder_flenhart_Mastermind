@@ -26,6 +26,10 @@ erweitere das spiel um diese todos damit es funktinosfähig ist und dann noch cl
 und mastermindmodel soll nur Model heißen die datei"
 
 ## 26.3.
+### To-Do:
+- Schrift für Versuche anpassen
+- benötigte Versuche bei
+
 
 ## 9.4.
 
