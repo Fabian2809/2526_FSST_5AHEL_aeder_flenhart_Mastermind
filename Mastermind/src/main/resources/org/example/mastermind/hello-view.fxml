@@ -4,102 +4,120 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.mastermind.Controller"
-      spacing="0"
-      style="-fx-background-color: #0f0f13;">
+<!--
+  Haupt-Layout: BorderPane
+    TOP    → Header (Titel + Versuche)
+    CENTER → Spielbrett (10 feste Zeilen) + Eingabebereich
+    BOTTOM → Ergebnis-Banner (nur sichtbar wenn Spiel endet)
+-->
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.mastermind.Controller"
+            style="-fx-background-color: #0d0d12;"
+            minWidth="460" minHeight="660">
 
-    <!-- ═══ HEADER ═══ -->
-    <VBox alignment="CENTER" spacing="4"
-          style="-fx-background-color: #0f0f13; -fx-padding: 24 0 16 0;">
-        <Label text="MASTERMIND"
-               style="-fx-text-fill: #ffffff; -fx-font-size: 26px;
-                      -fx-font-weight: bold; -fx-font-family: 'Courier New';
-                      -fx-letter-spacing: 6px;"/>
-        <Label fx:id="attemptsLabel" text="10 Versuche verbleibend"
-               style="-fx-text-fill: #555566; -fx-font-size: 12px;
-                      -fx-font-family: 'Courier New';"/>
-    </VBox>
-
-    <!-- ═══ SPIELBRETT ═══ -->
-    <ScrollPane fx:id="scrollPane"
-                fitToWidth="true" fitToHeight="false"
-                prefHeight="320"
-                hbarPolicy="NEVER"
-                style="-fx-background: transparent;
-                       -fx-background-color: transparent;
-                       -fx-border-width: 0;">
-        <VBox fx:id="boardBox" spacing="8" alignment="CENTER">
-            <padding><Insets top="8" right="24" bottom="8" left="24"/></padding>
+    <!-- ═══ TOP: HEADER ═══ -->
+    <top>
+        <VBox alignment="CENTER" spacing="3"
+              style="-fx-background-color: #0d0d12; -fx-padding: 20 0 12 0;">
+            <Label text="MASTERMIND"
+                   style="-fx-text-fill: #e8e8f0; -fx-font-size: 24px;
+                          -fx-font-weight: bold; -fx-font-family: 'Courier New';"/>
+            <Label fx:id="attemptsLabel" text="10 Versuche verbleibend"
+                   style="-fx-text-fill: #40404f; -fx-font-size: 11px;
+                          -fx-font-family: 'Courier New';"/>
         </VBox>
-    </ScrollPane>
+    </top>
 
-    <!-- ═══ TRENNLINIE ═══ -->
-    <Separator style="-fx-background-color: #222233; -fx-border-color: #222233;"/>
+    <!-- ═══ CENTER: BOARD + EINGABE ═══ -->
+    <center>
+        <VBox spacing="0">
 
-    <!-- ═══ AKTUELLER VERSUCH – Slots ═══ -->
-    <VBox alignment="CENTER" spacing="12"
-          style="-fx-background-color: #13131a; -fx-padding: 16 24 16 24;">
+            <!-- SPIELBRETT: 10 Zeilen, wächst mit dem Fenster -->
+            <VBox fx:id="boardBox" spacing="0" alignment="TOP_CENTER"
+                  style="-fx-background-color: #0d0d12; -fx-padding: 0 20 0 20;">
+                <VBox.vgrow>ALWAYS</VBox.vgrow>
+                <!-- Zeilen werden vom Controller eingefügt -->
+            </VBox>
 
-        <Label text="DEIN VERSUCH"
-               style="-fx-text-fill: #444455; -fx-font-size: 10px;
-                      -fx-font-family: 'Courier New'; -fx-letter-spacing: 3px;"/>
+            <!-- TRENNLINIE -->
+            <Separator style="-fx-background-color: #1e1e2a;"/>
 
-        <!-- 4 Slots -->
-        <HBox fx:id="slotsBox" spacing="12" alignment="CENTER"/>
+            <!-- EINGABE-BEREICH -->
+            <VBox alignment="CENTER" spacing="10"
+                  style="-fx-background-color: #10101a; -fx-padding: 14 20 14 20;">
 
-        <!-- Fehlermeldung -->
-        <Label fx:id="errorLabel" text=""
-               style="-fx-text-fill: #ff6b6b; -fx-font-size: 11px;
-                      -fx-font-family: 'Courier New';"/>
-    </VBox>
+                <!-- Slot-Label -->
+                <Label text="AKTUELLER VERSUCH"
+                       style="-fx-text-fill: #333344; -fx-font-size: 9px;
+                              -fx-font-family: 'Courier New';"/>
 
-    <!-- ═══ FARBPALETTE ═══ -->
-    <VBox alignment="CENTER" spacing="10"
-          style="-fx-background-color: #0f0f13; -fx-padding: 16 24 16 24;">
+                <!-- 4 Slots -->
+                <HBox fx:id="slotsBox" spacing="10" alignment="CENTER"/>
 
-        <Label text="FARBE WÄHLEN"
-               style="-fx-text-fill: #444455; -fx-font-size: 10px;
-                      -fx-font-family: 'Courier New'; -fx-letter-spacing: 3px;"/>
+                <!-- Farb-Palette -->
+                <HBox fx:id="colorPalette" spacing="10" alignment="CENTER"
+                      style="-fx-padding: 4 0 0 0;"/>
 
-        <HBox fx:id="colorPalette" spacing="14" alignment="CENTER"/>
-    </VBox>
+                <!-- Tastatur-Tipp + Fehler -->
+                <HBox alignment="CENTER" spacing="0">
+                    <Label fx:id="errorLabel" text=""
+                           style="-fx-text-fill: #e06c75; -fx-font-size: 11px;
+                                  -fx-font-family: 'Courier New';"/>
+                </HBox>
 
-    <!-- ═══ AKTIONS-BUTTONS ═══ -->
-    <HBox alignment="CENTER" spacing="12"
-          style="-fx-background-color: #0f0f13; -fx-padding: 0 24 20 24;">
-        <Button fx:id="submitButton" text="RATEN"
-                onAction="#onGuessSubmit"
-                prefWidth="160" prefHeight="40"
-                style="-fx-background-color: #4a9eff; -fx-text-fill: #ffffff;
-                       -fx-font-weight: bold; -fx-font-family: 'Courier New';
-                       -fx-font-size: 13px; -fx-background-radius: 6;
-                       -fx-cursor: hand;"/>
-        <Button fx:id="clearButton" text="✕  LÖSCHEN"
-                onAction="#onClearSlots"
-                prefWidth="120" prefHeight="40"
-                style="-fx-background-color: #1a1a26; -fx-text-fill: #555566;
-                       -fx-font-family: 'Courier New'; -fx-font-size: 12px;
-                       -fx-background-radius: 6; -fx-cursor: hand;
-                       -fx-border-color: #2a2a3e; -fx-border-radius: 6;"/>
-    </HBox>
+                <!-- Buttons -->
+                <HBox alignment="CENTER" spacing="10">
+                    <Button fx:id="submitButton" text="RATEN"
+                            onAction="#onGuessSubmit"
+                            prefWidth="130" prefHeight="36"
+                            style="-fx-background-color: #4a9eff; -fx-text-fill: #ffffff;
+                                   -fx-font-weight: bold; -fx-font-family: 'Courier New';
+                                   -fx-font-size: 12px; -fx-background-radius: 6;
+                                   -fx-cursor: hand;"/>
+                    <Button fx:id="hintButton" text="💡 HINT"
+                            onAction="#onHint"
+                            prefWidth="100" prefHeight="36"
+                            style="-fx-background-color: #2a2a3a; -fx-text-fill: #f9e2af;
+                                   -fx-font-family: 'Courier New'; -fx-font-size: 12px;
+                                   -fx-background-radius: 6; -fx-cursor: hand;
+                                   -fx-border-color: #3a3a4a; -fx-border-radius: 6;"/>
+                    <Button fx:id="clearButton" text="✕"
+                            onAction="#onClearSlots"
+                            prefWidth="44" prefHeight="36"
+                            style="-fx-background-color: #1e1e2e; -fx-text-fill: #555566;
+                                   -fx-font-family: 'Courier New'; -fx-font-size: 14px;
+                                   -fx-background-radius: 6; -fx-cursor: hand;
+                                   -fx-border-color: #2a2a3e; -fx-border-radius: 6;"/>
+                </HBox>
 
-    <!-- ═══ ERGEBNIS-MELDUNG ═══ -->
-    <VBox fx:id="resultBox" alignment="CENTER" spacing="14"
-          style="-fx-background-color: #0f0f13; -fx-padding: 0 24 24 24;"
-          visible="false" managed="false">
-        <Label fx:id="resultLabel" text=""
-               style="-fx-text-fill: #f9e2af; -fx-font-size: 16px;
-                      -fx-font-weight: bold; -fx-font-family: 'Courier New';
-                      -fx-text-alignment: center;" wrapText="true"/>
-        <Button fx:id="restartButton" text="⟳  NEUES SPIEL"
-                onAction="#onRestart"
-                prefWidth="180" prefHeight="40"
-                style="-fx-background-color: #a6e3a1; -fx-text-fill: #0f0f13;
-                       -fx-font-weight: bold; -fx-font-family: 'Courier New';
-                       -fx-font-size: 13px; -fx-background-radius: 6;
-                       -fx-cursor: hand;"/>
-    </VBox>
+                <!-- Tastatur-Hinweis -->
+                <Label text="Tastatur: R G B Y O P  |  Backspace = löschen  |  Enter = raten"
+                       style="-fx-text-fill: #2a2a3a; -fx-font-size: 9px;
+                              -fx-font-family: 'Courier New';"/>
+            </VBox>
 
-</VBox>
+        </VBox>
+    </center>
+
+    <!-- ═══ BOTTOM: ERGEBNIS-BANNER ═══ -->
+    <bottom>
+        <VBox fx:id="resultBox" alignment="CENTER" spacing="10"
+              style="-fx-background-color: #13131e; -fx-padding: 14 20 18 20;
+                     -fx-border-color: #1e1e2e; -fx-border-width: 1 0 0 0;"
+              visible="false" managed="false">
+            <Label fx:id="resultLabel" text=""
+                   style="-fx-text-fill: #f9e2af; -fx-font-size: 14px;
+                          -fx-font-weight: bold; -fx-font-family: 'Courier New';
+                          -fx-text-alignment: center;" wrapText="true"/>
+            <Button fx:id="restartButton" text="⟳  NEUES SPIEL"
+                    onAction="#onRestart"
+                    prefWidth="160" prefHeight="36"
+                    style="-fx-background-color: #a6e3a1; -fx-text-fill: #0d0d12;
+                           -fx-font-weight: bold; -fx-font-family: 'Courier New';
+                           -fx-font-size: 12px; -fx-background-radius: 6;
+                           -fx-cursor: hand;"/>
+        </VBox>
+    </bottom>
+
+</BorderPane>

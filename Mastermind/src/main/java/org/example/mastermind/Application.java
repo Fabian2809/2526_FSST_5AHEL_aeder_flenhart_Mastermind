@@ -13,9 +13,12 @@ public class Application extends javafx.application.Application {
         FXMLLoader fxmlLoader = new FXMLLoader(
             Application.class.getResource("hello-view.fxml")
         );
-        Scene scene = new Scene(fxmlLoader.load(), 460, 680);
+
+        Scene scene = new Scene(fxmlLoader.load(), 460, 700);
         stage.setTitle("Mastermind");
-        stage.setResizable(false);
+        stage.setMinWidth(420);
+        stage.setMinHeight(620);
+        stage.setResizable(true);   // ← Fenster jetzt skalierbar
         stage.setScene(scene);
         stage.show();
     }

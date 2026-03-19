@@ -1,15 +1,17 @@
 package org.example.mastermind;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class Model {
 
-    public static final char[] COLORS      = {'R', 'G', 'B', 'Y', 'O', 'P'};
-    public static final int    CODE_LENGTH  = 4;
-    public static final int    MAX_ATTEMPTS = 10;
+    public static final char[] COLORS       = {'R', 'G', 'B', 'Y', 'O', 'P'};
+    public static final int    CODE_LENGTH   = 4;
+    public static final int    MAX_ATTEMPTS  = 10;
 
-    private char[] secretCode;
-    private int    attemptsUsed;
+    private final char[] secretCode;
+    private int     attemptsUsed;
     private boolean won;
 
     public Model() {
@@ -28,7 +30,6 @@ public class Model {
 
     /**
      * Wertet einen Versuch aus.
-     * @param guess Array mit 4 Farbzeichen
      * @return int[]{exactHits (●), colorHits (○)}
      */
     public int[] checkGuess(char[] guess) {
@@ -36,11 +37,8 @@ public class Model {
 
         boolean[] secretUsed = new boolean[CODE_LENGTH];
         boolean[] guessUsed  = new boolean[CODE_LENGTH];
+        int exact = 0, color = 0;
 
-        int exact = 0;
-        int color = 0;
-
-        // Erst ● zählen
         for (int i = 0; i < CODE_LENGTH; i++) {
             if (guess[i] == secretCode[i]) {
                 exact++;
@@ -48,8 +46,6 @@ public class Model {
                 guessUsed[i]  = true;
             }
         }
-
-        // Dann ○ zählen
         for (int i = 0; i < CODE_LENGTH; i++) {
             if (guessUsed[i]) continue;
             for (int j = 0; j < CODE_LENGTH; j++) {
@@ -62,12 +58,21 @@ public class Model {
         }
 
         if (exact == CODE_LENGTH) won = true;
-
         return new int[]{exact, color};
     }
 
-    public boolean isWon()               { return won; }
-    public boolean isOver()              { return won || attemptsUsed >= MAX_ATTEMPTS; }
-    public int     getRemainingAttempts(){ return MAX_ATTEMPTS - attemptsUsed; }
-    public char[]  getSecretCode()       { return secretCode; }
+    /**
+     * Gibt die Menge der Farben zurück, die im geheimen Code enthalten sind.
+     * Wird für den Hint-Button verwendet.
+     */
+    public Set<Character> getColorsInCode() {
+        Set<Character> set = new HashSet<>();
+        for (char c : secretCode) set.add(c);
+        return set;
+    }
+
+    public boolean isWon()                { return won; }
+    public boolean isOver()               { return won || attemptsUsed >= MAX_ATTEMPTS; }
+    public int     getRemainingAttempts() { return MAX_ATTEMPTS - attemptsUsed; }
+    public char[]  getSecretCode()        { return secretCode; }
 }
