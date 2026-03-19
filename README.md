@@ -15,6 +15,14 @@
 - Hinttaste (nur Farben die enthalten sind)
 - Tastatureingabe
 
+### Prompt:
+neue todos:
+* Fenstergröße änderbar bachen
+* Alle Versuche immer sehen damit man nicht scrollen muss (lass dir ein cleanes desing einfallen)
+* Hint-Button (graut alle Farben aus die nicht einthalten sind in der Lösung)
+* Tastatureingabe ermöglichen
+erweitere das spiel um diese todos damit es funktinosfähig ist und dann noch clean aussieh und alle erweiterungen erfüllt sind, wieder nur 4 artefakte zum downloaden
+
 ## 26.3.
 
 ## 9.4.
