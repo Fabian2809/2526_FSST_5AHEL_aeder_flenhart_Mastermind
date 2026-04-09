@@ -25,6 +25,7 @@ public class Model {
         Random rnd = new Random();
         for (int i = 0; i < CODE_LENGTH; i++) {
             secretCode[i] = COLORS[rnd.nextInt(COLORS.length)];
+            System.out.println(secretCode[i]);
         }
     }
 

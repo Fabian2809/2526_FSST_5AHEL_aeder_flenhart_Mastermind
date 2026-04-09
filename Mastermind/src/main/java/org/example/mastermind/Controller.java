@@ -1,4 +1,5 @@
 package org.example.mastermind;
+//package com.tutorialspoint;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -10,10 +11,34 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+import java.net.URI;
+import java.util.*;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
+
+class Helper extends TimerTask {
+    public Label UhrzeitLabel;
+    int i = 0;
+    Timer timer;
+
+    public Helper(Label Uhrzeitlabel, Timer timer) {
+        this.UhrzeitLabel = Uhrzeitlabel;
+        this.timer = timer;
+    }
+
+    public void run() {
+        System.out.println(i);
+        i++;
+        // UhrzeitLabel.setText(timer.toString());    }
+
+
+    }
+}
 public class Controller {
 
+    public Label UhrzeitLabel;
     // ─────────────────────────────────────────────────────
     //  FXML-Felder
     // ─────────────────────────────────────────────────────
@@ -54,6 +79,7 @@ public class Controller {
     private Label[] slotLabels    = new Label[4];
     private Label[] paletteLabels = new Label[6];
     private HBox[]  boardRows     = new HBox[10];
+    Timer timer;
 
     /**
      * Merkt sich welche Palette-Einträge durch den Hint deaktiviert wurden.
@@ -73,8 +99,22 @@ public class Controller {
         buildColorPalette();
         updateAttemptsLabel();
         setupKeyboardInput();
-    }
+        timer = new Timer();
+        TimerTask task = new Helper(UhrzeitLabel, timer);
 
+        timer.schedule(task, 2000, 5000);
+        /*
+        TimerTask tasknew = new TimerSchedulePeriod();
+        timer = new Timer();
+        timer.schedule(tasknew,100, 100);
+
+         */
+    }
+    /*
+    public void run() {
+        UhrzeitLabel.setText(timer.toString());
+    }
+*/
     // ─────────────────────────────────────────────────────
     //  Board aufbauen (10 feste Zeilen)
     // ─────────────────────────────────────────────────────
@@ -328,7 +368,7 @@ public class Controller {
         if (hintUsed) reapplyHint();
 
         if (model.isWon()) {
-            showResult("🎉  Gewonnen! Code geknackt!", true);
+            showResult("🎉  Gewonnen! Code geknackt! ", true);
         } else if (model.isOver()) {
             String secret = new String(model.getSecretCode());
             showResult("😞  Verloren! Code war: " + secret, false);
@@ -430,7 +470,13 @@ public class Controller {
     }
 
     private void showResult(String message, boolean won) {
-        resultLabel.setText(message);
+        int attemps = 10- model.getRemainingAttempts();
+        if(won){
+
+            resultLabel.setText(message+ attemps+" Versuch(e) gebraucht!");
+        }else{
+            resultLabel.setText(message);
+        }
         resultLabel.setStyle(
             "-fx-text-fill: " + (won ? "#a6e3a1" : "#f38ba8") + ";" +
             "-fx-font-size: 13px; -fx-font-weight: bold;" +
