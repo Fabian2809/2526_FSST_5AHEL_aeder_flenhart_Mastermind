@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.application.Platform;
+
 
 
 class Helper extends TimerTask {
@@ -29,13 +31,13 @@ class Helper extends TimerTask {
     }
 
     public void run() {
-        System.out.println(i);
+        Platform.runLater(() -> {
+            UhrzeitLabel.setText("Tick: " + i);
+        });
         i++;
-        // UhrzeitLabel.setText(timer.toString());    }
-
-
     }
 }
+
 public class Controller {
 
     public Label UhrzeitLabel;
